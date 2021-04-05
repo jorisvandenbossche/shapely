@@ -16,6 +16,7 @@ import pygeos
 
 from shapely.affinity import affine_transform
 from shapely.coords import CoordinateSequence
+from shapely.errors import ShapelyDeprecationWarning
 
 log = logging.getLogger(__name__)
 
