@@ -92,6 +92,11 @@ def test_loads_srid():
         "BIIdd", "0101000020346C0000333333333333F33F3333333333330B40")
 
 
+requires_geos_39 = pytest.mark.xfail(
+    geos_version < (3, 9, 0), reason="GEOS >= 3.9.0 is required", strict=True)
+
+
+@requires_geos_39
 def test_point_empty():
     g = wkt.loads("POINT EMPTY")
     assert g.wkb_hex == hostorder(
