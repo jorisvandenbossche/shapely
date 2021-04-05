@@ -96,7 +96,7 @@ requires_geos_380 = pytest.mark.xfail(
     geos_version < (3, 8, 0), reason="GEOS >= 3.8.0 is required", strict=True)
 
 
-@requires_geos_39
+@requires_geos_380
 def test_point_empty():
     g = wkt.loads("POINT EMPTY")
     assert g.wkb_hex == hostorder(
