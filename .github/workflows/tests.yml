@@ -61,14 +61,16 @@ jobs:
           ./ci/install_geos.sh
           cd ${{ github.workspace }}
 
+      - name: Set environment variables for PyGEOS installation
+        shell: bash
+        run: |
+          echo "GEOS_CONFIG=$GEOS_INSTALL/bin/geos-config" >> $GITHUB_ENV
+
       - name: Install python dependencies
-        env:
-          GEOS_CONFIG: $GEOS_INSTALL/bin/geos-config
         shell: bash
         run: |
           pip install --disable-pip-version-check --upgrade pip
           pip install --upgrade wheel
-          echo "GEOS_CONFIG=$GEOS_INSTALL/bin/geos-config" >> $GITHUB_ENV
           pip install git+https://github.com/pygeos/pygeos.git -v
           if [ "$GEOS_VERSION" = "master" ]; then
             pip install --upgrade --pre Cython numpy;
