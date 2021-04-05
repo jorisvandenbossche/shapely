@@ -13,6 +13,8 @@ from shapely.geometry import Point, Polygon
 from shapely.geometry.polygon import LinearRing, LineString
 from shapely.geometry.base import dump_coords
 
+import pygeos
+
 
 def test_linearring_from_coordinate_sequence():
     expected_coords = [(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (0.0, 0.0)]
@@ -63,7 +65,7 @@ def test_linearring_from_too_short_linestring():
     # 4 coordinates (closed)
     coords = [(0.0, 0.0), (1.0, 1.0)]
     line = LineString(coords)
-    with pytest.raises(ValueError, match="at least 3 coordinate tuple|at least 4 coordinates"):
+    with pytest.raises(pygeos.GEOSException, match="Invalid number of points"):
         LinearRing(line)
 
 
@@ -159,7 +161,7 @@ def test_polygon_from_polygon():
 
 def test_polygon_from_invalid():
     # Error handling
-    with pytest.raises(ValueError):
+    with pytest.raises(pygeos.GEOSException):
         # A LinearRing must have at least 3 coordinate tuples
         Polygon([[1, 2], [2, 3]])
 
