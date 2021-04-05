@@ -1,6 +1,7 @@
 from shapely import wkt
 from . import shapely20_deprecated
 
+from shapely.errors import ShapelyDeprecationWarning
 from shapely.geometry import LineString
 from shapely.geometry.collection import GeometryCollection
 from shapely.geometry import shape
