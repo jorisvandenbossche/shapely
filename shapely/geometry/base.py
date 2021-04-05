@@ -527,6 +527,8 @@ class BaseGeometry(pygeos.Geometry):
         """True if the geometry is closed, else False
 
         Applicable only to 1-D geometries."""
+        if self.geom_type == 'LinearRing':
+            return True
         return bool(pygeos.is_closed(self))
 
     @property
