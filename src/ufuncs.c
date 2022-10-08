@@ -421,6 +421,39 @@ static void* GEOSBoundaryAllTypes_r(void* context, void* geom) {
 }
 static void* boundary_data[1] = {GEOSBoundaryAllTypes_r};
 static void* unary_union_data[1] = {GEOSUnaryUnion_r};
+static void* IntersectionAll(void* context, void* geom) {
+  GEOSGeometry *part = NULL;
+  GEOSGeometry *result = NULL;
+  int size, i;
+
+  size = GEOSGetNumGeometries_r(context, geom);
+  if (size == -1) {
+    return NULL;
+  }
+  if (size == 0) {
+    return (void*) GEOSGeom_createEmptyCollection_r(context, 7);
+  }
+  result = GEOSGetGeometryN_r(context, geom, 0);
+  if (result == NULL) {
+    return NULL;
+  }
+  result = GEOSGeom_clone_r(context, result);
+  if (result == NULL) {
+    return NULL;
+  }
+  for (i = 1; i < size; i++) {
+    part = GEOSGetGeometryN_r(context, geom, i);
+    if (part == NULL) {
+      return NULL;
+    }
+    result = GEOSIntersection_r(context, result, part);
+    if (result == NULL) {
+      return NULL;
+    }
+  }
+  return (void*)result;
+}
+static void* intersection_all1_data[1] = {IntersectionAll};
 static void* point_on_surface_data[1] = {GEOSPointOnSurface_r};
 static void* centroid_data[1] = {GEOSGetCentroid_r};
 static void* line_merge_data[1] = {GEOSLineMerge_r};
@@ -3549,6 +3582,7 @@ int init_ufuncs(PyObject* m, PyObject* d) {
   DEFINE_Y_Y(convex_hull);
   DEFINE_Y_Y(boundary);
   DEFINE_Y_Y(unary_union);
+  DEFINE_Y_Y(intersection_all1);
   DEFINE_Y_Y(point_on_surface);
   DEFINE_Y_Y(centroid);
   DEFINE_Y_Y(line_merge);
