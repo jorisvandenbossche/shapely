@@ -172,10 +172,12 @@ def intersection_all(geometries, axis=None, **kwargs):
     else:
         geometries = np.rollaxis(geometries, axis=axis, start=geometries.ndim)
 
-    # create_collection acts on the inner axis
-    collections = lib.create_collection(geometries, GeometryType.GEOMETRYCOLLECTION)
+    # # create_collection acts on the inner axis
+    # collections = lib.create_collection(geometries, GeometryType.GEOMETRYCOLLECTION)
 
-    return lib.intersection_all1(collections, **kwargs)
+    # return lib.intersection_all1(collections, **kwargs)
+
+    return lib.intersection_all2(geometries, **kwargs)
 
     # return lib.intersection.reduce(geometries, axis=axis, **kwargs)
 
