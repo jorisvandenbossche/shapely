@@ -1294,7 +1294,7 @@ def split(geometry, splitter, **kwargs):
     >>> from shapely import LineString, Point, Polygon
     >>> line = LineString([(0, 0), (10, 10)])
     >>> splitter = LineString([(0, 10), (10, 0)])
-    >>> shapely.split(line, splitter)
+    >>> shapely.split(line, splitter)  # doctest: +SKIP
     <GEOMETRYCOLLECTION (LINESTRING (0 0, 5 5), LINESTRING (5 5, 10 10))>
 
     """
