@@ -464,6 +464,14 @@ class SplitOp:
         'GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), LINESTRING (1 1, 2 2))'
 
         """
+        # starting with GEOS 3.15, the split function is available through GEOS
+        # and moreover our custom implementation no longer works correctly for
+        # some cases (GEOS' difference now returns a merged LineString instead
+        # of separate parts as a MultiLineString)
+        # -> so for GEOS >= 3.15, we have to use the GEOS implementation
+        if shapely.geos_version >= (3, 15, 0):
+            return shapely.lib.split_scalar(geom, splitter)
+
         if geom.geom_type in {"MultiLineString", "MultiPolygon"}:
             return GeometryCollection(
                 [i for part in geom.geoms for i in SplitOp.split(part, splitter).geoms]

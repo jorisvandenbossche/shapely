@@ -2,7 +2,8 @@ import unittest
 
 import pytest
 
-from shapely.errors import GeometryTypeError
+from shapely import geos_version
+from shapely.errors import GeometryTypeError, GEOSException
 from shapely.geometry import (
     LineString,
     MultiLineString,
@@ -105,12 +106,19 @@ class TestSplitPolygon(TestSplitGeometry):
         self.helper(self.poly_hole, splitter, 2)
 
     def test_split_poly_with_other(self):
-        with pytest.raises(GeometryTypeError):
+        error = GeometryTypeError if geos_version < (3, 15, 0) else GEOSException
+
+        with pytest.raises(error):
             split(self.poly_simple, Point(1, 1))
-        with pytest.raises(GeometryTypeError):
+        with pytest.raises(error):
             split(self.poly_simple, MultiPoint([(1, 1), (3, 4)]))
-        with pytest.raises(GeometryTypeError):
-            split(self.poly_simple, self.poly_hole)
+
+        if geos_version < (3, 15, 0):
+            with pytest.raises(GeometryTypeError):
+                split(self.poly_simple, self.poly_hole)
+        else:
+            # GEOS >= 3.15 allows splitting a polygon with another polygon
+            self.helper(self.poly_simple, self.poly_hole, 2)
 
 
 class TestSplitLine(TestSplitGeometry):
@@ -155,10 +163,13 @@ class TestSplitLine(TestSplitGeometry):
         splitter = LineString([(0, 1), (1, 0), (1, 2)])
         self.helper(self.ls, splitter, 3)
 
-        # overlaps --> raise
+        # overlaps --> raise (with GEOS >= 3.15, this will return 2 segments)
         splitter = LineString([(0, 0), (15, 15)])
-        with pytest.raises(ValueError):
-            self.helper(self.ls, splitter, 1)
+        if geos_version < (3, 15, 0):
+            with pytest.raises(ValueError):
+                self.helper(self.ls, splitter, 1)
+        else:
+            self.helper(self.ls, splitter, 2)
 
         # does not cross --> return equal
         splitter = LineString([(0, 1), (0, 2)])
@@ -187,10 +198,13 @@ class TestSplitLine(TestSplitGeometry):
         splitter = MultiLineString([[(0, 1), (1, 0)], [(0, 2), (2, 0), (2.2, 3.2)]])
         self.helper(self.ls, splitter, 4)
 
-        # overlaps --> raise
+        # overlaps --> raise (with GEOS >= 3.15, this will return 2 segments)
         splitter = MultiLineString([[(0, 0), (1.5, 1.5)], [(1.5, 1.5), (3, 4)]])
-        with pytest.raises(ValueError):
-            self.helper(self.ls, splitter, 1)
+        if geos_version < (3, 15, 0):
+            with pytest.raises(ValueError):
+                self.helper(self.ls, splitter, 1)
+        else:
+            self.helper(self.ls, splitter, 2)
 
         # does not cross --> return equal
         splitter = MultiLineString([[(0, 1), (0, 2)], [(1, 0), (2, 0)]])
