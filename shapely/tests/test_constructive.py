@@ -27,6 +27,7 @@ from shapely.tests.common import (
     empty_line_string,
     empty_point,
     empty_polygon,
+    geometry_collection,
     ignore_invalid,
     line_string,
     multi_point,
@@ -1751,15 +1752,18 @@ def test_split_unsupported_geometry_type():
     with pytest.raises(GEOSException, match=msg):
         shapely.split(polygon, multi_point)
 
-    # Point/MultiPoint seems supported, but this is essentially a no-op
-    # but also returning Point instead of GeometryCollection
-    actual = shapely.split(point, point)
-    assert actual.geom_type == "Point"
-    assert actual.equals(point)
+    msg = "Input geometry must be linear or polygonal"
+    with pytest.raises(GEOSException, match=msg):
+        shapely.split(point, point)
 
-    actual = shapely.split(multi_point, point)
-    assert actual.geom_type == "MultiPoint"
-    assert actual.equals(multi_point)
+    with pytest.raises(GEOSException, match=msg):
+        shapely.split(point, line_string)
+
+    with pytest.raises(GEOSException, match=msg):
+        shapely.split(multi_point, point)
+
+    with pytest.raises(GEOSException, match=msg):
+        shapely.split(geometry_collection, point)
 
 
 @pytest.mark.skipif(shapely.geos_version >= (3, 15, 0), reason="GEOS >= 3.15")
