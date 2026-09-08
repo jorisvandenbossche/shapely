@@ -1,6 +1,106 @@
 Version 2.x
 ===========
 
+
+.. _version-2-2-0:
+
+Version 2.2.0 (2026-09-xx)
+--------------------------
+
+New features
+^^^^^^^^^^^^
+
+Performance improvements for scalar function calls
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While the shapely 2.0 release provided significant performance improvements for
+vectorized operations on arrays of geometries (through the new top-level
+universal functions), this came at the cost of the performance of scalar
+function calls (#2035, #2339).
+
+TODO add benchmarks example of creating point and calling some attribute
+
+Improved performance of the following geometry methods: `area`, `length`,
+`minimum_clearance`, `x`, `y`, `z`, `m`, `has_z`, `has_m`, `is_empty`,
+`is_ring`, `is_closed`, `is_simple`, `geom_type`, `__len__`, `_ndim`.
+Benchmarks showed a change of call duration from 2.6 microseconds to 0.2
+microseconds (on the `Point.x` attribute).
+
+Improved performance by changing the GEOS context handling. Instead of
+initializing/finalizing on every call, GEOS contexts are reused through a
+threadlocal variable. It should give a performance increase of about
+75 nanoseconds per call.
+
+New functions
+~~~~~~~~~~~~~
+
+Several new functions from GEOS are now exposed in Shapely as top-level
+vectorized functions:
+
+- :func:`.minimum_width` to compute the minimum width (minimum diameter)
+  of a geometry (#2313).
+- :func:`.coverage_clean`, which returns a cleaned version of geometries
+  forming a polygonal coverage (#2454)  (requires GEOS >= 3.10).
+
+In addition, two other functions have been added to the top-level namespace:
+
+- :func:`.transform_coordseq`, which applies a transformation function per
+  coordinate sequence in a more performant way than
+  :func:`shapely.ops.transform` does (which is now deprecated, see below)
+  (#1902).
+- :func:`.get_segments`, which returns individual linear features from all
+  pairwise coordinates in each input LineString or LinearRing (#2306).
+
+Other improvements
+~~~~~~~~~~~~~~~~~~
+
+- The :func:`.relate` and :func:`.relate_pattern` functions now support
+  prepared geometries, i.e. they will use a faster implementation if you ensure
+  the left input geometry has been prepared first using :func:`.prepare`, which
+  can be beneficial when testing that geometry against multiple other
+  geometries (#2385).
+
+- Instead of creating / destroying a GEOS context at every function call, it is
+  reused through a thread-local GEOS context (#2343).
+
+- :func:`.Polygon.from_bounds` now builds the ring in counterclockwise order,
+  consistent with :function:`shapely.box`, so the result satisfies the GeoJSON
+  right-hand rule (#2396).
+
+- Added return values to :func:`.prepare` and :func:`.destroy_prepared`. They
+  now return whether something was done; calling `prepare` twice on a geometry
+  will first return `True`, and then `False` (#2359).
+
+API changes
+^^^^^^^^^^^
+
+- shapely.ops.transform is deprecated TODO expand
+
+
+Bug fixes
+^^^^^^^^^
+
+- Fix :func:`.to_ragged_array` to work with read-only array input (#2376).
+- Fix ``MultiPolygon`` constructor to raise a proper error message when
+  passing a sequence of non-polygons (#2461).
+- Fix a crash in :func:`.coverage_invalid_edges` on invalid (non-geometry)
+  input (#2483).
+
+Packaging
+^^^^^^^^^
+
+- Shapely 2.2.0 requires GEOS >= 3.10, Python >= 3.11, and NumPy >= 1.26
+  (#2302, #2301, #2499).
+- Binary wheels are now also built for the Windows ARM64 platform (#2307).
+- Linux wheels are upgraded from manylinux2014 to manylinux_2_28 (#2363).
+- Upgraded the GEOS version in the binary wheel distributions to 3.14.1.
+- Wheels are available for Python 3.15.
+
+Acknowledgments
+^^^^^^^^^^^^^^^
+
+TODO add acknowledgments before final release
+
 .. _version-2-1-2:
 
 Version 2.1.2 (2025-09-24)
