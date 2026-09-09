@@ -5,7 +5,7 @@ import numpy as np
 from shapely import Geometry, GeometryType, lib
 from shapely._enum import ParamEnum
 from shapely._geometry_helpers import collections_1d, simple_geometries_1d
-from shapely.decorators import deprecate_positional, multithreading_enabled
+from shapely.decorators import deprecate_positional
 from shapely.io import from_wkt
 
 __all__ = [
@@ -50,7 +50,6 @@ def _xyz_to_coords(x, y, z):
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def points(
     coords,
     y=None,
@@ -61,7 +60,7 @@ def points(
     out=None,
     **kwargs,
 ):
-    """Create an array of points.
+    """Create an array of Points.
 
     Parameters
     ----------
@@ -99,6 +98,10 @@ def points(
     **kwargs
         See :ref:`NumPy ufunc docs <ufuncs.kwargs>` for other keyword arguments.
         Ignored if ``indices`` is provided.
+
+    See Also
+    --------
+    multipoints : Create an array of MultiPoints.
 
     Examples
     --------
@@ -138,7 +141,6 @@ def points(
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def linestrings(
     coords,
     y=None,
@@ -149,9 +151,9 @@ def linestrings(
     out=None,
     **kwargs,
 ):
-    """Create an array of linestrings.
+    """Create an array of LineStrings.
 
-    This function will raise an exception if a linestring contains less than
+    This function will raise an exception if a LineString contains less than
     two points.
 
     Parameters
@@ -193,6 +195,11 @@ def linestrings(
         See :ref:`NumPy ufunc docs <ufuncs.kwargs>` for other keyword arguments.
         Ignored if ``indices`` is provided.
 
+    See Also
+    --------
+    linearrings : Create an array of LinearRings.
+    multilinestrings : Create an array of MultiLineStrings.
+
     Examples
     --------
     >>> import shapely
@@ -232,7 +239,6 @@ def linestrings(
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def linearrings(
     coords,
     y=None,
@@ -243,12 +249,12 @@ def linearrings(
     out=None,
     **kwargs,
 ):
-    """Create an array of linearrings.
+    """Create an array of LinearRings.
 
-    If the provided coords do not constitute a closed linestring, or if there
+    If the provided coords do not constitute a closed LineString, or if there
     are only 3 provided coords, the first
     coordinate is duplicated at the end to close the ring. This function will
-    raise an exception if a linearring contains less than three points or if
+    raise an exception if a LinearRing contains less than three points or if
     the terminal coordinates contain NaN (not-a-number).
 
     Parameters
@@ -292,7 +298,9 @@ def linearrings(
 
     See Also
     --------
-    linestrings
+    linestrings : Create an array of LineStrings.
+    polygons : Create an array of Polygons.
+    multipolygons : Create an array of MultiPolygons.
 
     Examples
     --------
@@ -330,19 +338,18 @@ def linearrings(
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def polygons(geometries, holes=None, indices=None, *, out=None, **kwargs):
-    """Create an array of polygons.
+    """Create an array of Polygons.
 
     Parameters
     ----------
     geometries : array_like
-        An array of linearrings or coordinates (see linearrings).
+        An array of LinearRings or coordinates (see :func:`~linearrings`).
         Unless ``indices`` are given (see description below), this
         include the outer shells only. The ``holes`` argument should be used
         to create polygons with holes.
     holes : array_like, optional
-        An array of lists of linearrings that constitute holes for each shell.
+        An array of lists of LinearRings that constitute holes for each shell.
         Not to be used in combination with ``indices``.
     indices : array_like, optional
         Indices into the target array where input geometries belong. If
@@ -366,6 +373,10 @@ def polygons(geometries, holes=None, indices=None, *, out=None, **kwargs):
         A deprecation warning is shown if ``indices`` is specified as a
         positional argument. This will need to be specified as a keyword
         argument in a future release.
+
+    See Also
+    --------
+    linearrings : Create an array of LinearRings.
 
     Examples
     --------
@@ -444,9 +455,8 @@ def polygons(geometries, holes=None, indices=None, *, out=None, **kwargs):
 
 
 @deprecate_positional(["ccw"], category=DeprecationWarning)
-@multithreading_enabled
 def box(xmin, ymin, xmax, ymax, ccw=True, **kwargs):
-    """Create box polygons.
+    """Create a box Polygon (or an array of boxes).
 
     Parameters
     ----------
@@ -474,6 +484,10 @@ def box(xmin, ymin, xmax, ymax, ccw=True, **kwargs):
         positional argument. This will need to be specified as a keyword
         argument in a future release.
 
+    See Also
+    --------
+    polygons : Create an array of Polygons.
+
     Examples
     --------
     >>> import shapely
@@ -496,14 +510,13 @@ def box(xmin, ymin, xmax, ymax, ccw=True, **kwargs):
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def multipoints(geometries, indices=None, *, out=None, **kwargs):
-    """Create multipoints from arrays of points.
+    """Create an array of MultiPoints.
 
     Parameters
     ----------
     geometries : array_like
-        An array of points or coordinates (see points).
+        An array of Points or coordinates (see :func:`~points`).
     indices : array_like, optional
         Indices into the target array where input geometries belong. If
         provided, both geometries and indices should be 1D and have matching
@@ -523,6 +536,10 @@ def multipoints(geometries, indices=None, *, out=None, **kwargs):
         A deprecation warning is shown if ``indices`` is specified as a
         positional argument. This will need to be specified as a keyword
         argument in a future release.
+
+    See Also
+    --------
+    points : Create an array of Points.
 
     Examples
     --------
@@ -581,14 +598,13 @@ def multipoints(geometries, indices=None, *, out=None, **kwargs):
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def multilinestrings(geometries, indices=None, *, out=None, **kwargs):
-    """Create multilinestrings from arrays of linestrings.
+    """Create an array of MultiLineStrings.
 
     Parameters
     ----------
     geometries : array_like
-        An array of linestrings or coordinates (see linestrings).
+        An array of LineStrings or coordinates (see :func:`~linestrings`).
     indices : array_like, optional
         Indices into the target array where input geometries belong. If
         provided, both geometries and indices should be 1D and have matching
@@ -611,7 +627,8 @@ def multilinestrings(geometries, indices=None, *, out=None, **kwargs):
 
     See Also
     --------
-    multipoints
+    linestrings : Create an array of LineStrings.
+    multipoints : Create an array of MultiPoints.
 
     """
     typ = GeometryType.MULTILINESTRING
@@ -637,14 +654,13 @@ def multilinestrings(geometries, indices=None, *, out=None, **kwargs):
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def multipolygons(geometries, indices=None, *, out=None, **kwargs):
-    """Create multipolygons from arrays of polygons.
+    """Create an array of MultiPolygons.
 
     Parameters
     ----------
     geometries : array_like
-        An array of polygons or coordinates (see polygons).
+        An array of Polygons or coordinates (see :func:`~polygons`).
     indices : array_like, optional
         Indices into the target array where input geometries belong. If
         provided, both geometries and indices should be 1D and have matching
@@ -667,7 +683,8 @@ def multipolygons(geometries, indices=None, *, out=None, **kwargs):
 
     See Also
     --------
-    multipoints
+    multipoints : Create an array of MultiPoints.
+    polygons : Create an array of Polygons.
 
     """
     typ = GeometryType.MULTIPOLYGON
@@ -692,9 +709,8 @@ def multipolygons(geometries, indices=None, *, out=None, **kwargs):
 
 
 @deprecate_positional(["indices"], category=DeprecationWarning)
-@multithreading_enabled
 def geometrycollections(geometries, indices=None, out=None, **kwargs):
-    """Create geometrycollections from arrays of geometries.
+    """Create an array of GeometryCollections.
 
     Parameters
     ----------
@@ -722,7 +738,7 @@ def geometrycollections(geometries, indices=None, out=None, **kwargs):
 
     See Also
     --------
-    multipoints
+    multipoints : Create an array of MultiPoints.
 
     """
     typ = GeometryType.GEOMETRYCOLLECTION
@@ -796,7 +812,8 @@ def destroy_prepared(geometry, **kwargs):
 
     See Also
     --------
-    prepare
+    prepare : Prepare a geometry, improving performance of other operations.
+    is_prepared : Identify whether a geometry is prepared already.
 
     """
     return lib.destroy_prepared(geometry, **kwargs)

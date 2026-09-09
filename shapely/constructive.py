@@ -8,7 +8,6 @@ from shapely.algorithms._oriented_envelope import _oriented_envelope_min_area_ve
 from shapely.algorithms.cga import _orient_polygons_vectorized
 from shapely.decorators import (
     deprecate_positional,
-    multithreading_enabled,
     requires_geos,
 )
 from shapely.errors import UnsupportedGEOSVersionError
@@ -89,7 +88,6 @@ class BufferJoinStyle(ParamEnum):
     bevel = 3
 
 
-@multithreading_enabled
 def boundary(geometry, **kwargs):
     """Return the topological boundary of a geometry.
 
@@ -139,7 +137,6 @@ MultiLineString, MultiPoint, Point, Polygon
     ["quad_segs", "cap_style", "join_style", "mitre_limit", "single_sided"],
     category=DeprecationWarning,
 )
-@multithreading_enabled
 def buffer(
     geometry,
     distance,
@@ -269,7 +266,6 @@ def buffer(
 @deprecate_positional(
     ["quad_segs", "join_style", "mitre_limit"], category=DeprecationWarning
 )
-@multithreading_enabled
 def offset_curve(
     geometry, distance, quad_segs=8, join_style="round", mitre_limit=5.0, **kwargs
 ):
@@ -344,7 +340,6 @@ def offset_curve(
     )
 
 
-@multithreading_enabled
 def centroid(geometry, **kwargs):
     """Compute the geometric center (center-of-mass) of a geometry.
 
@@ -377,7 +372,6 @@ def centroid(geometry, **kwargs):
     return lib.centroid(geometry, **kwargs)
 
 
-@multithreading_enabled
 def clip_by_rect(geometry, xmin, ymin, xmax, ymax, **kwargs):
     """Return the portion of a geometry within a rectangle.
 
@@ -428,7 +422,6 @@ def clip_by_rect(geometry, xmin, ymin, xmax, ymax, **kwargs):
 
 
 @requires_geos("3.11.0")
-@multithreading_enabled
 def concave_hull(geometry, ratio=0.0, allow_holes=False, **kwargs):
     """Compute a concave geometry that encloses an input geometry.
 
@@ -464,7 +457,6 @@ def concave_hull(geometry, ratio=0.0, allow_holes=False, **kwargs):
     return lib.concave_hull(geometry, np.double(ratio), np.bool_(allow_holes), **kwargs)
 
 
-@multithreading_enabled
 def convex_hull(geometry, **kwargs):
     """Compute the minimum convex geometry that encloses an input geometry.
 
@@ -488,7 +480,6 @@ def convex_hull(geometry, **kwargs):
     return lib.convex_hull(geometry, **kwargs)
 
 
-@multithreading_enabled
 def delaunay_triangles(geometry, tolerance=0.0, only_edges=False, **kwargs):
     """Compute a Delaunay triangulation around the vertices of an input geometry.
 
@@ -543,7 +534,6 @@ def delaunay_triangles(geometry, tolerance=0.0, only_edges=False, **kwargs):
     return lib.delaunay_triangles(geometry, tolerance, only_edges, **kwargs)
 
 
-@multithreading_enabled
 def constrained_delaunay_triangles(geometry, **kwargs):
     """Compute the constrained Delaunay triangulation of polygons.
 
@@ -590,7 +580,6 @@ def constrained_delaunay_triangles(geometry, **kwargs):
     return lib.constrained_delaunay_triangles(geometry, **kwargs)
 
 
-@multithreading_enabled
 def envelope(geometry, **kwargs):
     """Compute the minimum bounding box that encloses an input geometry.
 
@@ -618,7 +607,6 @@ def envelope(geometry, **kwargs):
     return lib.envelope(geometry, **kwargs)
 
 
-@multithreading_enabled
 def extract_unique_points(geometry, **kwargs):
     """Return all distinct vertices of an input geometry as a multipoint.
 
@@ -651,7 +639,6 @@ def extract_unique_points(geometry, **kwargs):
     return lib.extract_unique_points(geometry, **kwargs)
 
 
-@multithreading_enabled
 def build_area(geometry, **kwargs):
     """Create an areal geometry formed by the constituent linework of given geometry.
 
@@ -677,7 +664,6 @@ def build_area(geometry, **kwargs):
     return lib.build_area(geometry, **kwargs)
 
 
-@multithreading_enabled
 def make_valid(geometry, *, method="linework", keep_collapsed=True, **kwargs):
     """Repair invalid geometries.
 
@@ -755,7 +741,6 @@ def make_valid(geometry, *, method="linework", keep_collapsed=True, **kwargs):
     )
 
 
-@multithreading_enabled
 def minimum_clearance_line(geometry, **kwargs):
     """Return a LineString whose endpoints define the minimum clearance.
 
@@ -791,7 +776,6 @@ def minimum_clearance_line(geometry, **kwargs):
     return lib.minimum_clearance_line(geometry, **kwargs)
 
 
-@multithreading_enabled
 def normalize(geometry, **kwargs):
     """Convert Geometry to strict normal form (or canonical form).
 
@@ -819,7 +803,6 @@ def normalize(geometry, **kwargs):
     return lib.normalize(geometry, **kwargs)
 
 
-@multithreading_enabled
 def point_on_surface(geometry, **kwargs):
     """Return a point that intersects an input geometry.
 
@@ -847,7 +830,6 @@ def point_on_surface(geometry, **kwargs):
     return lib.point_on_surface(geometry, **kwargs)
 
 
-@multithreading_enabled
 def node(geometry, **kwargs):
     """Return the fully noded version of the linear input as MultiLineString.
 
@@ -1000,7 +982,6 @@ def polygonize_full(geometries, **kwargs):
 
 
 @requires_geos("3.11.0")
-@multithreading_enabled
 def remove_repeated_points(geometry, tolerance=0.0, **kwargs):
     """Return a copy of a Geometry with repeated points removed.
 
@@ -1032,7 +1013,6 @@ def remove_repeated_points(geometry, tolerance=0.0, **kwargs):
     return lib.remove_repeated_points(geometry, tolerance, **kwargs)
 
 
-@multithreading_enabled
 def reverse(geometry, **kwargs):
     """Return a copy of a Geometry with the order of coordinates reversed.
 
@@ -1067,7 +1047,6 @@ def reverse(geometry, **kwargs):
     return lib.reverse(geometry, **kwargs)
 
 
-@multithreading_enabled
 def segmentize(geometry, max_segment_length, **kwargs):
     """Add vertices to line segments based on maximum segment length.
 
@@ -1115,7 +1094,6 @@ def segmentize(geometry, max_segment_length, **kwargs):
 
 
 @deprecate_positional(["preserve_topology"], category=DeprecationWarning)
-@multithreading_enabled
 def simplify(geometry, tolerance, preserve_topology=True, **kwargs):
     """Return a simplified version of an input geometry.
 
@@ -1168,7 +1146,6 @@ def simplify(geometry, tolerance, preserve_topology=True, **kwargs):
         return lib.simplify(geometry, tolerance, **kwargs)
 
 
-@multithreading_enabled
 def snap(geometry, reference, tolerance, **kwargs):
     """Snap the vertices and segments of the geometry to vertices of the reference.
 
@@ -1313,7 +1290,6 @@ def split(geometry, splitter, **kwargs):
 @deprecate_positional(
     ["extend_to", "only_edges", "ordered"], category=DeprecationWarning
 )
-@multithreading_enabled
 def voronoi_polygons(
     geometry, tolerance=0.0, extend_to=None, only_edges=False, ordered=False, **kwargs
 ):
@@ -1383,7 +1359,6 @@ def voronoi_polygons(
     )
 
 
-@multithreading_enabled
 def _oriented_envelope_geos(geometry, **kwargs):
     return lib.oriented_envelope(geometry, **kwargs)
 
@@ -1441,7 +1416,6 @@ def oriented_envelope(geometry, **kwargs):
 minimum_rotated_rectangle = oriented_envelope
 
 
-@multithreading_enabled
 def minimum_bounding_circle(geometry, **kwargs):
     """Compute the minimum bounding circle that encloses an input geometry.
 
@@ -1477,7 +1451,6 @@ def minimum_bounding_circle(geometry, **kwargs):
     return lib.minimum_bounding_circle(geometry, **kwargs)
 
 
-@multithreading_enabled
 def minimum_width(geometry, **kwargs):
     """Compute the minimum width (minimum diameter) of a geometry.
 
@@ -1516,7 +1489,6 @@ def minimum_width(geometry, **kwargs):
     return lib.minimum_width(geometry, **kwargs)
 
 
-@multithreading_enabled
 def maximum_inscribed_circle(geometry, tolerance=None, **kwargs):
     """Find the largest circle that is fully contained within the input geometry.
 
@@ -1554,7 +1526,7 @@ def maximum_inscribed_circle(geometry, tolerance=None, **kwargs):
     >>> from shapely import Polygon
     >>> poly = Polygon([(0, 0), (0, 10), (10, 10), (10, 0), (0, 0)])
     >>> shapely.maximum_inscribed_circle(poly)
-    <LINESTRING (5 5, 0 5)>
+    <LINESTRING (5 5, 10 5)>
 
     See Also
     --------
@@ -1567,12 +1539,10 @@ def maximum_inscribed_circle(geometry, tolerance=None, **kwargs):
     return lib.maximum_inscribed_circle(geometry, tolerance, **kwargs)
 
 
-@multithreading_enabled
 def _orient_polygons_geos(geometry, exterior_cw=False, **kwargs):
     return lib.orient_polygons(geometry, exterior_cw, **kwargs)
 
 
-@multithreading_enabled
 def orient_polygons(geometry, *, exterior_cw=False, **kwargs):
     """Enforce a ring orientation on all polygonal elements in the input geometry.
 
