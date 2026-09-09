@@ -1232,7 +1232,6 @@ def snap(geometry, reference, tolerance, **kwargs):
     return lib.snap(geometry, reference, tolerance, **kwargs)
 
 
-@requires_geos("3.15.0")
 def split(geometry, splitter, **kwargs):
     """Split a geometry by another geometry.
 
@@ -1275,7 +1274,13 @@ def split(geometry, splitter, **kwargs):
     <GEOMETRYCOLLECTION (LINESTRING (0 0, 5 5), LINESTRING (5 5, 10 10))>
 
     """
-    return lib.split(geometry, splitter, **kwargs)
+    if lib.geos_version < (3, 15, 0):
+        from shapely.ops import split
+
+        split_py_vectorized = np.frompyfunc(split, nin=2, nout=1)
+        return split_py_vectorized(geometry, splitter, **kwargs)
+    else:
+        return lib.split(geometry, splitter, **kwargs)
 
 
 # Note: future plan is to change this signature over a few releases:

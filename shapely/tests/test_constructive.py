@@ -1,4 +1,3 @@
-import re
 import sys
 
 import numpy as np
@@ -18,7 +17,7 @@ from shapely import (
     Polygon,
     geos_version,
 )
-from shapely.errors import UnsupportedGEOSVersionError
+from shapely.errors import GeometryTypeError, UnsupportedGEOSVersionError
 from shapely.testing import assert_geometries_equal
 from shapely.tests.common import (
     ArrayLike,
@@ -1326,7 +1325,6 @@ def test_orient_polygons_array_like():
     assert_geometries_equal(np.asarray(actual), expected)
 
 
-@pytest.mark.skipif(shapely.geos_version < (3, 15, 0), reason="GEOS < 3.15")
 @pytest.mark.parametrize(
     "geometry,splitter, expected",
     [
@@ -1442,13 +1440,17 @@ def test_orient_polygons_array_like():
             ],
         ),
         # overlaps --> splits overlapping segment
-        (
+        pytest.param(
             LineString([(0, 0), (1.5, 1.5), (3.0, 4.0)]),
             LineString([(0, 0), (15, 15)]),
             [
                 LineString([(0, 0), (1.5, 1.5)]),
                 LineString([(1.5, 1.5), (3.0, 4.0)]),
             ],
+            marks=pytest.mark.xfail(
+                shapely.geos_version < (3, 15, 0),
+                reason="GEOS 3.15 required for splitting overlapping input",
+            ),
         ),
         # does not cross --> return equal
         (
@@ -1519,13 +1521,17 @@ def test_orient_polygons_array_like():
             ],
         ),
         # overlaps --> splits overlapping segment
-        (
+        pytest.param(
             LineString([(0, 0), (1.5, 1.5), (3.0, 4.0)]),
             MultiLineString([[(0, 0), (1.5, 1.5)], [(1.5, 1.5), (3, 4)]]),
             [
                 LineString([(0, 0), (1.5, 1.5)]),
                 LineString([(1.5, 1.5), (3.0, 4.0)]),
             ],
+            marks=pytest.mark.xfail(
+                shapely.geos_version < (3, 15, 0),
+                reason="GEOS 3.15 required for splitting overlapping input",
+            ),
         ),
         # does not cross --> return equal
         (
@@ -1670,7 +1676,6 @@ poly_hole = Polygon(
 )
 
 
-@pytest.mark.skipif(shapely.geos_version < (3, 15, 0), reason="GEOS < 3.15")
 @pytest.mark.parametrize(
     "geometry, splitter, expected_num_parts",
     [
@@ -1728,8 +1733,24 @@ poly_hole = Polygon(
         ),
         ## Polygon with Polygon
         # crossing twice with a polygon boundary --> return 3 polygons
-        (poly_simple, Polygon([(0.2, 3), (0.2, -3), (1.7, -3), (1.7, 3)]), 3),
-        (poly_hole, Polygon([(0.2, 3), (0.2, -3), (1.7, -3), (1.7, 3)]), 3),
+        pytest.param(
+            poly_simple,
+            Polygon([(0.2, 3), (0.2, -3), (1.7, -3), (1.7, 3)]),
+            3,
+            marks=pytest.mark.xfail(
+                shapely.geos_version < (3, 15, 0),
+                reason="GEOS 3.15 required for splitting overlapping input",
+            ),
+        ),
+        pytest.param(
+            poly_hole,
+            Polygon([(0.2, 3), (0.2, -3), (1.7, -3), (1.7, 3)]),
+            3,
+            marks=pytest.mark.xfail(
+                shapely.geos_version < (3, 15, 0),
+                reason="GEOS 3.15 required for splitting overlapping input",
+            ),
+        ),
     ],
 )
 def test_split_roundtrip(geometry, splitter, expected_num_parts):
@@ -1745,34 +1766,61 @@ def test_split_roundtrip(geometry, splitter, expected_num_parts):
         assert actual.geoms[0].equals(geometry)
 
 
-@pytest.mark.skipif(shapely.geos_version < (3, 15, 0), reason="GEOS < 3.15")
 def test_split_unsupported_geometry_type():
-    msg = "Splitting a Polygon with a point is not supported"
-    with pytest.raises(GEOSException, match=msg):
+    error = GeometryTypeError if geos_version < (3, 15, 0) else GEOSException
+    msg = "Splitting a Polygon with a (point|Point|MultiPoint) is not supported"
+    with pytest.raises(error, match=msg):
         shapely.split(polygon, point)
 
-    with pytest.raises(GEOSException, match=msg):
+    with pytest.raises(error, match=msg):
         shapely.split(polygon, multi_point)
 
-    msg = "Input geometry must be linear or polygonal"
-    with pytest.raises(GEOSException, match=msg):
+    msg = (
+        "Splitting (Point|MultiPoint|GeometryCollection) geometry is not supported"
+        if geos_version < (3, 15, 0)
+        else "Input geometry must be linear or polygonal"
+    )
+    with pytest.raises(error, match=msg):
         shapely.split(point, point)
 
-    with pytest.raises(GEOSException, match=msg):
+    with pytest.raises(error, match=msg):
         shapely.split(point, line_string)
 
-    with pytest.raises(GEOSException, match=msg):
+    with pytest.raises(error, match=msg):
         shapely.split(multi_point, point)
 
-    with pytest.raises(GEOSException, match=msg):
+    with pytest.raises(error, match=msg):
         shapely.split(geometry_collection, point)
 
 
-@pytest.mark.skipif(shapely.geos_version >= (3, 15, 0), reason="GEOS >= 3.15")
-def test_split_requires_geos_315():
-    msg = "'split' requires at least GEOS 3.15.0"
-    with pytest.raises(UnsupportedGEOSVersionError, match=re.escape(msg)):
-        shapely.split(line_string, point)
+def test_split_array():
+    # because we have a custom python implementation for older GEOS, need to
+    # ensure this has the same capabilities as numpy ufuncs to work with array-likes
+    line = LineString([(0, 0), (1.5, 1.5), (3.0, 4.0)])
+    point1 = Point(1, 1)
+    point2 = Point(1.5, 1.5)
+
+    geometries = np.array([[line] * 2] * 3)
+    actual = shapely.split(geometries, point1)
+    assert isinstance(actual, np.ndarray)
+    assert actual.shape == (3, 2)
+    expected = shapely.split(line, point1)
+    assert (actual == expected).all()
+
+    # with array-like
+    actual = shapely.split(ArrayLike([line, line]), point1)
+    assert isinstance(actual, ArrayLike)
+    assert np.asarray(actual).shape == (2,)
+    assert_geometries_equal(np.asarray(actual), expected)
+
+    # with broadcasting of second argument
+    actual = shapely.split(geometries, [point1, point2])
+    assert isinstance(actual, np.ndarray)
+    assert actual.shape == (3, 2)
+    expected1 = shapely.split(line, point1)
+    expected2 = shapely.split(line, point2)
+    assert (actual[:, 0] == expected1).all()
+    assert (actual[:, 1] == expected2).all()
 
 
 def test_buffer_deprecate_positional():
